@@ -1,0 +1,46 @@
+[project]
+name = "ia-fpga"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "cocotb>=1.9.0",
+    "cocotb-bus>=0.2.1",
+    "pytest>=8.0.0",
+    "pyserial>=3.5",
+    "requests>=2.31.0",
+    "pexpect>=4.9.0",
+    "numpy>=1.26.0",
+    "migen",
+    "litex",
+    "litex-boards",
+    "litedram",
+    "liteeth",
+    "litespi",
+    "pythondata-cpu-vexriscv",
+    "pythondata-cpu-vexriscv-smp",
+    "pythondata-software-picolibc",
+    "pythondata-software-compiler-rt",
+    "torch>=2.14.1",
+    "torchvision>=0.29.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ia_fpga"]
+
+[tool.uv.sources]
+migen = { path = "deps/migen", editable = true }
+litex = { path = "deps/litex", editable = true }
+litex-boards = { path = "deps/litex-boards", editable = true }
+litedram = { path = "deps/litedram", editable = true }
+liteeth = { path = "deps/liteeth", editable = true }
+litespi = { path = "deps/litespi", editable = true }
+pythondata-cpu-vexriscv = { path = "deps/pythondata-cpu-vexriscv", editable = true }
+pythondata-cpu-vexriscv-smp = { path = "deps/pythondata-cpu-vexriscv-smp", editable = true }
+pythondata-software-picolibc = { path = "deps/pythondata-software-picolibc", editable = true }
+pythondata-software-compiler-rt = { path = "deps/pythondata-software-compiler_rt", editable = true }

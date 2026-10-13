@@ -1,0 +1,13 @@
+standard = "2008"
+preferred_case = "lower"
+
+[libraries]
+defaultlib.files = [
+    "rtl/vhdl/*.vhd",
+    "rtl/vhdl/**/*.vhd",
+]
+
+unisim.files = [
+    "/home/jacques/Xilinx/2026.1/Vivado/data/vhdl/src/unisims/unisim_VCOMP.vhd",
+]
+unisim.is_third_party = true

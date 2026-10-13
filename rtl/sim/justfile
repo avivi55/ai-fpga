@@ -1,0 +1,60 @@
+set shell := ["bash", "-c"]
+
+project_root := parent_directory(parent_directory(justfile_directory()))
+export VIRTUAL_ENV := project_root + "/.venv"
+export PATH := project_root + "/toolchain/bin:" + project_root + "/.venv/bin:" + env_var('PATH')
+
+VHDL_PRE_FLAGS   := "-fexplicit --ieee=synopsys --std=08 -C"
+
+VPI_PATH   := `../../.venv/bin/cocotb-config --lib-name-path vpi ghdl 2>/dev/null || cocotb-config --lib-name-path vpi ghdl`
+LIBPYTHON  := `../../.venv/bin/cocotb-config --libpython 2>/dev/null || cocotb-config --libpython`
+PYGPI_BIN  := `../../.venv/bin/cocotb-config --python-bin 2>/dev/null || cocotb-config --python-bin`
+GPI_ENTRY  := `../../.venv/bin/cocotb-config --pygpi-entry-point 2>/dev/null || cocotb-config --pygpi-entry-point`
+
+export COCOTB_LOG_LEVEL := "INFO"
+export LIBPYTHON_LOC    := LIBPYTHON
+export PYGPI_PYTHON_BIN := PYGPI_BIN
+
+all: test
+
+test: test-scalar test-vec test-wb
+
+test-vec:
+	@just run-test "vec_mac_unit" "test_vec_mac"
+
+test-scalar:
+	@just run-test "mac_unit" "test_mac"
+
+run-test entity module:
+	@ghdl -a -g {{VHDL_PRE_FLAGS}} "../vhdl/{{entity}}.vhd"
+	@export LD_PRELOAD="{{LIBPYTHON}}"; \
+	 export LIBPYTHON_LOC="{{LIBPYTHON}}"; \
+	 export PYGPI_PYTHON_BIN="{{PYGPI_BIN}}"; \
+	 export GPI_USERS="{{GPI_ENTRY}}"; \
+	 export COCOTB_TEST_MODULES="{{module}}"; \
+	 ghdl -r {{VHDL_PRE_FLAGS}} {{entity}} --vpi={{VPI_PATH}} --ieee-asserts=disable-at-0
+	@just clean
+
+wave:
+	@ghdl -a -g {{VHDL_PRE_FLAGS}} "../vhdl/vec_mac_unit.vhd"
+	@export LD_PRELOAD="{{LIBPYTHON}}"; \
+	 export LIBPYTHON_LOC="{{LIBPYTHON}}"; \
+	 export PYGPI_PYTHON_BIN="{{PYGPI_BIN}}"; \
+	 export GPI_USERS="{{GPI_ENTRY}}"; \
+	 export COCOTB_TEST_MODULES="test_vec_mac"; \
+	 ghdl -r {{VHDL_PRE_FLAGS}} vec_mac_unit --vpi={{VPI_PATH}} --ieee-asserts=disable-at-0 --wave=wave.ghw
+	@echo "Chronogramme généré : sim/wave.ghw"
+
+test-wb:
+	@ghdl -a -g {{VHDL_PRE_FLAGS}} "../vhdl/sync_fifo.vhd" "../vhdl/vec_mac_unit.vhd" "../vhdl/dma_reader.vhd" "../vhdl/accel_wishbone.vhd"
+	@export LD_PRELOAD="{{LIBPYTHON}}"; \
+	 export LIBPYTHON_LOC="{{LIBPYTHON}}"; \
+	 export PYGPI_PYTHON_BIN="{{PYGPI_BIN}}"; \
+	 export GPI_USERS="{{GPI_ENTRY}}"; \
+	 export COCOTB_TEST_MODULES="test_accel_wb"; \
+	 ghdl -r {{VHDL_PRE_FLAGS}} accel_wishbone --vpi={{VPI_PATH}} --ieee-asserts=disable-at-0
+	@just clean
+	
+clean:
+	@rm -f *.cf
+	@rm -rf __pycache__ .pytest_cache results.xml
