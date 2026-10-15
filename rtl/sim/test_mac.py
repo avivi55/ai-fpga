@@ -23,11 +23,10 @@ async def test_mac_directed_cases(dut):
     await reset_dut(dut)
 
     corner_cases = [
-        (0, 0)
-        (127, 127) # max pos # 16129
-        (-128, -128) # max neg # 16384
-        (-128, 127) # max op sign # -16256
-        # (1, -1)
+        (0, 0),
+        (127, 127),
+        (-128, -128),
+        (-128, 127),
     ]
 
     expected_accumulator = 0
